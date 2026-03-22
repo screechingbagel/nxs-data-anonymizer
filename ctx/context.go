@@ -282,7 +282,7 @@ func tmpLogError(msg string, err error) {
 	l, _ := appctx.DefaultLogInit(os.Stderr, logrus.InfoLevel, &logrus.JSONFormatter{})
 	l.WithFields(logrus.Fields{
 		"details": err,
-	}).Errorf(msg)
+	}).Errorf("%s", msg)
 }
 
 func logInit(file, level string, ft LogFormat) (*logrus.Logger, error) {

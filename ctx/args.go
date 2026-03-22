@@ -43,7 +43,7 @@ func ArgsRead() (Args, error) {
 		"conf",
 		'c',
 		confPathDefault,
-		fmt.Sprintf("Config file path"))
+		"Config file path")
 
 	input := args.StringLong(
 		"input",
@@ -126,7 +126,7 @@ func ArgsRead() (Args, error) {
 func argsHelp(args *getopt.Set) {
 
 	additionalDescription := `
-	
+
 Additional description
 
   Tool for anonymizing PostgreSQL and MySQL databases' dump

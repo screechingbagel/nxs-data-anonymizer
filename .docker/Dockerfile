@@ -1,4 +1,4 @@
-FROM golang:1.21-bullseye as build-env
+FROM golang:1.26-bullseye as build-env
 
 ARG APP_VERSION
 
@@ -12,4 +12,3 @@ FROM alpine
 RUN apk update --no-cache && apk add --no-cache tar postgresql-client mysql-client libc6-compat s3cmd
 
 COPY --from=build-env /nxs-data-anonymizer /
-
