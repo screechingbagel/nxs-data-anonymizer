@@ -12,8 +12,12 @@ import (
 	fsm "github.com/nixys/nxs-go-fsm"
 )
 
+// func DataHandlerAddComma(ctx any, data []byte, trigger []byte) ([]byte, error) {
+// 	return []byte{}, nil
+// }
+
 func DataHandlerAddComma(ctx any, data []byte, trigger []byte) ([]byte, error) {
-	return []byte{}, nil
+	return append(data, ','), nil
 }
 
 type MySQL struct {
