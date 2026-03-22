@@ -1,11 +1,12 @@
 module github.com/nixys/nxs-data-anonymizer
 
-go 1.21.1
+go 1.22
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/docker/go-units v0.5.0
 	github.com/go-sql-driver/mysql v1.7.1
+	github.com/jaswdr/faker/v2 v2.9.1
 	github.com/nixys/nxs-go-appctx/v3 v3.0.0
 	github.com/nixys/nxs-go-conf v1.1.0
 	github.com/nixys/nxs-go-fsm v1.0.0

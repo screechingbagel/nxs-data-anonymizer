@@ -2,9 +2,11 @@ package misc
 
 import (
 	"bytes"
+	"strings"
 	ttemplate "text/template"
 
 	"github.com/Masterminds/sprig/v3"
+	"github.com/jaswdr/faker/v2"
 )
 
 var (
@@ -22,6 +24,9 @@ func TemplateExec(tpl string, d any) (TemlateRes, error) {
 
 	var b bytes.Buffer
 
+	// faker integration for realistic data
+	fake := faker.New()
+
 	// See http://masterminds.github.io/sprig/ for details
 	t, err := ttemplate.New("template").Funcs(func() ttemplate.FuncMap {
 
@@ -33,13 +38,40 @@ func TemplateExec(tpl string, d any) (TemlateRes, error) {
 			return TemplateNULL
 		}
 		t["isNull"] = func(v string) bool {
-			if v == TemplateNULL {
-				return true
-			}
-			return false
+			return v == TemplateNULL
 		}
 		t["drop"] = func() string {
 			return TemplateDrop
+		}
+
+		// Names
+		t["fakerName"] = fake.Person().Name
+		t["fakerFirstName"] = fake.Person().FirstName
+		t["fakerLastName"] = fake.Person().LastName
+
+		// Contact
+		t["fakerEmail"] = fake.Internet().Email
+		t["fakerPhone"] = fake.Phone().Number
+
+		// Address
+		t["fakerAddress"] = fake.Address().Address
+		t["fakerStreetAddress"] = fake.Address().StreetAddress
+		t["fakerSecondaryAddress"] = fake.Address().SecondaryAddress
+		t["fakerCity"] = fake.Address().City
+		t["fakerPostcode"] = fake.Address().PostCode
+
+		// Company
+		t["fakerCompany"] = fake.Company().Name
+
+		// Identifiers
+		t["fakerIBAN"] = func() string {
+			return strings.ToUpper(fake.Bothify("??####################"))
+		}
+		t["fakerSwift"] = func() string {
+			return strings.ToUpper(fake.Bothify("??????##"))
+		}
+		t["fakerEIN"] = func() string {
+			return fake.Bothify("##-#######")
 		}
 
 		return t
