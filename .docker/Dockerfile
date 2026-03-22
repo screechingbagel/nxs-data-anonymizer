@@ -1,4 +1,4 @@
-FROM golang:1.26-bullseye as build-env
+FROM golang:1.26-bullseye AS build-env
 
 ARG APP_VERSION
 

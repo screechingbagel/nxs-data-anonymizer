@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/nixys/nxs-data-anonymizer/misc"
 )
@@ -253,7 +254,7 @@ func dhCreateTableValuesStringEnd(usrCtx any, deferred, token []byte) ([]byte, e
 
 func rowDataGen(uctx *userCtx) []byte {
 
-	var out string
+	var out strings.Builder
 
 	row := uctx.filter.ValuePop()
 	if row.Values == nil {
@@ -263,24 +264,24 @@ func rowDataGen(uctx *userCtx) []byte {
 	for i, v := range row.Values {
 
 		if i > 0 {
-			out += ","
+			out.WriteString(",")
 		}
 
 		if v.V == misc.TemplateNULL {
-			out += "NULL"
+			out.WriteString("NULL")
 		} else {
 			switch uctx.tables[uctx.filter.TableNameGet()][uctx.filter.ColumnGetName(i)] {
 			case columnTypeString:
-				out += fmt.Sprintf("'%s'", v.V)
+				fmt.Fprintf(&out, "'%s'", v.V)
 			case columnTypeBinary:
-				out += fmt.Sprintf("_binary '%s'", v.V)
+				fmt.Fprintf(&out, "_binary '%s'", v.V)
 			default:
-				out += fmt.Sprintf("%s", v.V)
+				fmt.Fprintf(&out, "%s", v.V)
 			}
 		}
 	}
 
-	return []byte(fmt.Sprintf("(%s)", out))
+	return fmt.Appendf(nil, "(%s)", out.String())
 }
 
 // SecurityPolicyCheck checks the table passes the security rules

@@ -50,9 +50,9 @@ func dhCreateTableDesc(usrCtx any, deferred, token []byte) ([]byte, error) {
 
 	clmns := make(map[string]string)
 
-	ss := bytes.Split(deferred, []byte{'\n'})
+	ss := bytes.SplitSeq(deferred, []byte{'\n'})
 
-	for _, v := range ss {
+	for v := range ss {
 
 		s := strings.TrimSuffix(strings.TrimSpace(string(v)), ",")
 
@@ -187,7 +187,7 @@ func dhValueEnd(usrCtx any, deferred, token []byte) ([]byte, error) {
 
 func rowDataGen(filter *relfilter.Filter) []byte {
 
-	var out string
+	var out strings.Builder
 
 	row := filter.ValuePop()
 	if row.Values == nil {
@@ -197,17 +197,17 @@ func rowDataGen(filter *relfilter.Filter) []byte {
 	for i, v := range row.Values {
 
 		if i > 0 {
-			out += "\t"
+			out.WriteString("\t")
 		}
 
 		if v.V == misc.TemplateNULL {
-			out += "\\N"
+			out.WriteString("\\N")
 		} else {
-			out += fmt.Sprintf("%s", v.V)
+			fmt.Fprintf(&out, "%s", v.V)
 		}
 	}
 
-	return fmt.Appendf([]byte(out), "\n")
+	return fmt.Appendf([]byte(out.String()), "\n")
 }
 
 // SecurityPolicyCheck checks the table passes the security rules

@@ -526,7 +526,7 @@ func (filter *Filter) applyRules(tname string, rls []applyRule) error {
 
 func (filter *Filter) applyColumnFilter(cn string, cr ColumnRuleOpts, td any, tde []string) (string, bool, error) {
 
-	for i := 0; i < uniqueAttempts; i++ {
+	for range uniqueAttempts {
 
 		v, d, err := execFilter(
 			execFilterOpts{
@@ -571,7 +571,7 @@ func (filter *Filter) applyColumnFilter(cn string, cr ColumnRuleOpts, td any, td
 
 func (filter *Filter) applyLinkFilter(cn string, cr ColumnRuleOpts, u map[string]any, td any, tde []string) (string, bool, error) {
 
-	for i := 0; i < uniqueAttempts; i++ {
+	for range uniqueAttempts {
 
 		v, d, err := execFilter(
 			execFilterOpts{
