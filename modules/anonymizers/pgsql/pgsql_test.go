@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/nixys/nxs-data-anonymizer/misc"
-	"github.com/nixys/nxs-data-anonymizer/modules/filters/relfilter"
+	"github.com/screechingbagel/nxs-data-anonymizer/misc"
+	"github.com/screechingbagel/nxs-data-anonymizer/modules/filters/relfilter"
 )
 
 func TestPgSQL(t *testing.T) {

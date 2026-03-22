@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/nixys/nxs-data-anonymizer/misc"
-	"github.com/nixys/nxs-data-anonymizer/modules/filters/relfilter"
+	"github.com/screechingbagel/nxs-data-anonymizer/misc"
+	"github.com/screechingbagel/nxs-data-anonymizer/modules/filters/relfilter"
 )
 
 func dhSecurityCopy(usrCtx any, deferred, token []byte) ([]byte, error) {

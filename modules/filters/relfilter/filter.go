@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/nixys/nxs-data-anonymizer/misc"
+	"github.com/screechingbagel/nxs-data-anonymizer/misc"
 )
 
 type InitOpts struct {

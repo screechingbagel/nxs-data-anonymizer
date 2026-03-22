@@ -3,7 +3,7 @@ package relfilter
 import (
 	"testing"
 
-	"github.com/nixys/nxs-data-anonymizer/misc"
+	"github.com/screechingbagel/nxs-data-anonymizer/misc"
 )
 
 func TestExecFilter(t *testing.T) {

@@ -1,4 +1,4 @@
-module github.com/nixys/nxs-data-anonymizer
+module github.com/screechingbagel/nxs-data-anonymizer
 
 go 1.26.1
 

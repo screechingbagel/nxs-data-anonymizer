@@ -6,14 +6,14 @@ import (
 	"os"
 	"time"
 
-	"github.com/nixys/nxs-data-anonymizer/interfaces"
-	mysql_anonymize "github.com/nixys/nxs-data-anonymizer/modules/anonymizers/mysql"
-	pgsql_anonymize "github.com/nixys/nxs-data-anonymizer/modules/anonymizers/pgsql"
-	progressreader "github.com/nixys/nxs-data-anonymizer/modules/progress_reader"
+	"github.com/screechingbagel/nxs-data-anonymizer/interfaces"
+	mysql_anonymize "github.com/screechingbagel/nxs-data-anonymizer/modules/anonymizers/mysql"
+	pgsql_anonymize "github.com/screechingbagel/nxs-data-anonymizer/modules/anonymizers/pgsql"
+	progressreader "github.com/screechingbagel/nxs-data-anonymizer/modules/progress_reader"
 
-	"github.com/nixys/nxs-data-anonymizer/ds/mysql"
-	"github.com/nixys/nxs-data-anonymizer/misc"
-	"github.com/nixys/nxs-data-anonymizer/modules/filters/relfilter"
+	"github.com/screechingbagel/nxs-data-anonymizer/ds/mysql"
+	"github.com/screechingbagel/nxs-data-anonymizer/misc"
+	"github.com/screechingbagel/nxs-data-anonymizer/modules/filters/relfilter"
 	"github.com/sirupsen/logrus"
 
 	appctx "github.com/nixys/nxs-go-appctx/v3"

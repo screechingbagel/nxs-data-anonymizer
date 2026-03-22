@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/nixys/nxs-data-anonymizer/misc"
+	"github.com/screechingbagel/nxs-data-anonymizer/misc"
 )
 
 func dhSecurityInsertInto(usrCtx any, deferred, token []byte) ([]byte, error) {

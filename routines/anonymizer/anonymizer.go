@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/docker/go-units"
-	"github.com/nixys/nxs-data-anonymizer/ctx"
-	"github.com/nixys/nxs-data-anonymizer/interfaces"
+	"github.com/screechingbagel/nxs-data-anonymizer/ctx"
+	"github.com/screechingbagel/nxs-data-anonymizer/interfaces"
 	"github.com/sirupsen/logrus"
 
 	appctx "github.com/nixys/nxs-go-appctx/v3"

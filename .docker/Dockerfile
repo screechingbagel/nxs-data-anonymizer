@@ -5,7 +5,7 @@ ARG APP_VERSION
 WORKDIR /usr/src/app
 ADD ./ /usr/src/app
 
-RUN go build -ldflags "-X github.com/nixys/nxs-data-anonymizer/ctx.version=$APP_VERSION" -o /nxs-data-anonymizer
+RUN go build -ldflags "-X github.com/screechingbagel/nxs-data-anonymizer/ctx.version=$APP_VERSION" -o /nxs-data-anonymizer
 
 FROM alpine
 
