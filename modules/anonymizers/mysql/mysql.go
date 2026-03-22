@@ -6,8 +6,8 @@ import (
 	"io"
 	"regexp"
 
-	"github.com/screechingbagel/nxs-data-anonymizer/misc"
-	"github.com/screechingbagel/nxs-data-anonymizer/modules/filters/relfilter"
+	"github.com/nixys/nxs-data-anonymizer/misc"
+	"github.com/nixys/nxs-data-anonymizer/modules/filters/relfilter"
 
 	fsm "github.com/nixys/nxs-go-fsm"
 )

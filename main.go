@@ -5,9 +5,9 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/screechingbagel/nxs-data-anonymizer/ctx"
-	"github.com/screechingbagel/nxs-data-anonymizer/misc"
-	"github.com/screechingbagel/nxs-data-anonymizer/routines/anonymizer"
+	"github.com/nixys/nxs-data-anonymizer/ctx"
+	"github.com/nixys/nxs-data-anonymizer/misc"
+	"github.com/nixys/nxs-data-anonymizer/routines/anonymizer"
 
 	_ "github.com/go-sql-driver/mysql"
 	appctx "github.com/nixys/nxs-go-appctx/v3"

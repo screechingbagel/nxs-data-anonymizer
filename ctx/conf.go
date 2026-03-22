@@ -3,8 +3,8 @@ package ctx
 import (
 	"fmt"
 
+	"github.com/nixys/nxs-data-anonymizer/misc"
 	conf "github.com/nixys/nxs-go-conf"
-	"github.com/screechingbagel/nxs-data-anonymizer/misc"
 )
 
 type confOpts struct {

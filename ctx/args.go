@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/nixys/nxs-data-anonymizer/misc"
 	"github.com/pborman/getopt/v2"
-	"github.com/screechingbagel/nxs-data-anonymizer/misc"
 )
 
 const (
