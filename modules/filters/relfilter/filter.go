@@ -72,6 +72,8 @@ type rules struct {
 	typeRuleDefault []typeRule
 
 	link []linkValues
+
+	valEnvGlob []string
 }
 
 type typeRule struct {
@@ -84,6 +86,11 @@ type tableData struct {
 	columns columns
 	values  []rowValue
 	uniques map[string]map[string]any
+
+	// Reusable scratch space for applyRules — allocated once per table and
+	// reset (not reallocated) on every row to reduce GC pressure.
+	valOld    map[string]string
+	valEnvOld []string
 }
 
 type rowValue struct {
@@ -190,6 +197,12 @@ func Init(opts InitOpts) (*Filter, error) {
 		vars[n] = v
 	}
 
+	// Pre-compute global env vars once;
+	valEnvGlob := make([]string, 0, len(vars))
+	for n, v := range vars {
+		valEnvGlob = append(valEnvGlob, fmt.Sprintf("%s%s=%s", envVarGlobalPrefix, n, v))
+	}
+
 	lvs := []linkValues{}
 	// Make links
 	for _, l := range opts.Link {
@@ -220,6 +233,7 @@ func Init(opts InitOpts) (*Filter, error) {
 	return &Filter{
 		rules: rules{
 			variables:        vars,
+			valEnvGlob:       valEnvGlob,
 			link:             lvs,
 			tableRules:       opts.TableRules,
 			defaultRules:     opts.DefaultRules,
@@ -234,10 +248,12 @@ func Init(opts InitOpts) (*Filter, error) {
 // TableCreate creates new data set for table `name`
 func (filter *Filter) TableCreate(name string) {
 	filter.tableData = tableData{
-		name:    name,
-		columns: columnsInit(),
-		uniques: make(map[string]map[string]any),
-		values:  []rowValue{},
+		name:      name,
+		columns:   columnsInit(),
+		uniques:   make(map[string]map[string]any),
+		values:    []rowValue{},
+		valOld:    make(map[string]string),
+		valEnvOld: []string{},
 	}
 }
 
@@ -405,26 +421,20 @@ func (filter *Filter) applyRules(tname string, rls []applyRule) error {
 		return nil
 	}
 
-	valEnvGlob := []string{}
-	for n, v := range filter.rules.variables {
-		valEnvGlob = append(
-			valEnvGlob,
-			fmt.Sprintf("%s%s=%s", envVarGlobalPrefix, n, v),
-		)
-	}
+	valEnvGlob := filter.rules.valEnvGlob
 
-	valOld := make(map[string]string)
-	valEnvOld := []string{}
+	// Reuse the per-table maps and slices
+	valOld := filter.tableData.valOld
+	valEnvOld := filter.tableData.valEnvOld[:0]
+
 	for i, c := range filter.tableData.columns.cc {
-
 		valOld[c.n] = filter.tableData.values[i].V
-
-		// Set env var only for columns with non-nil values
 		valEnvOld = append(
 			valEnvOld,
 			fmt.Sprintf("%s%s=%s", envVarColumnPrefix, c.n, filter.tableData.values[i].V),
 		)
 	}
+	filter.tableData.valEnvOld = valEnvOld
 
 	// Apply rule for each specified column
 	for _, r := range rls {

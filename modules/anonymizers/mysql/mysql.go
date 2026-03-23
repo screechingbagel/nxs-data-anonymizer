@@ -17,7 +17,7 @@ import (
 // }
 
 func DataHandlerAddComma(ctx any, data []byte, trigger []byte) ([]byte, error) {
-	return append(data, ','), nil
+	return []byte{}, nil
 }
 
 type MySQL struct {

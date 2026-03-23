@@ -3,6 +3,7 @@ package misc
 import (
 	"bytes"
 	"strings"
+	"sync"
 	ttemplate "text/template"
 
 	"github.com/Masterminds/sprig/v3"
@@ -19,69 +20,89 @@ type TemlateRes struct {
 	DropRow bool
 }
 
-// TemplateExec makes message from given template `tpl` and data `d`
-func TemplateExec(tpl string, d any) (TemlateRes, error) {
+var templateFake = faker.New()
 
-	var b bytes.Buffer
+var (
+	templateFuncMap     ttemplate.FuncMap
+	templateFuncMapOnce sync.Once
+)
 
-	// faker integration for realistic data
-	fake := faker.New()
-
-	// See http://masterminds.github.io/sprig/ for details
-	t, err := ttemplate.New("template").Funcs(func() ttemplate.FuncMap {
-
-		// Get current sprig functions
+func getTemplateFuncMap() ttemplate.FuncMap {
+	templateFuncMapOnce.Do(func() {
 		t := sprig.TxtFuncMap()
 
-		// Add additional functions
-		t["null"] = func() string {
-			return TemplateNULL
-		}
-		t["isNull"] = func(v string) bool {
-			return v == TemplateNULL
-		}
-		t["drop"] = func() string {
-			return TemplateDrop
-		}
+		t["null"] = func() string { return TemplateNULL }
+		t["isNull"] = func(v string) bool { return v == TemplateNULL }
+		t["drop"] = func() string { return TemplateDrop }
 
 		// Names
-		t["fakerName"] = fake.Person().Name
-		t["fakerFirstName"] = fake.Person().FirstName
-		t["fakerLastName"] = fake.Person().LastName
+		t["fakerName"] = templateFake.Person().Name
+		t["fakerFirstName"] = templateFake.Person().FirstName
+		t["fakerLastName"] = templateFake.Person().LastName
 
 		// Contact
-		t["fakerEmail"] = fake.Internet().Email
-		t["fakerPhone"] = fake.Phone().Number
+		t["fakerEmail"] = templateFake.Internet().Email
+		t["fakerPhone"] = templateFake.Phone().Number
 
 		// Address
-		t["fakerAddress"] = fake.Address().Address
-		t["fakerStreetAddress"] = fake.Address().StreetAddress
-		t["fakerSecondaryAddress"] = fake.Address().SecondaryAddress
-		t["fakerCity"] = fake.Address().City
-		t["fakerPostcode"] = fake.Address().PostCode
+		t["fakerAddress"] = templateFake.Address().Address
+		t["fakerStreetAddress"] = templateFake.Address().StreetAddress
+		t["fakerSecondaryAddress"] = templateFake.Address().SecondaryAddress
+		t["fakerCity"] = templateFake.Address().City
+		t["fakerPostcode"] = templateFake.Address().PostCode
 
 		// Company
-		t["fakerCompany"] = fake.Company().Name
+		t["fakerCompany"] = templateFake.Company().Name
 
 		// Identifiers
 		t["fakerIBAN"] = func() string {
-			return strings.ToUpper(fake.Bothify("??####################"))
+			return strings.ToUpper(templateFake.Bothify("??####################"))
 		}
 		t["fakerSwift"] = func() string {
-			return strings.ToUpper(fake.Bothify("??????##"))
+			return strings.ToUpper(templateFake.Bothify("??????##"))
 		}
 		t["fakerEIN"] = func() string {
-			return fake.Bothify("##-#######")
+			return templateFake.Bothify("##-#######")
 		}
 
-		return t
-	}()).Parse(tpl)
+		templateFuncMap = t
+	})
+	return templateFuncMap
+}
+
+var (
+	templateCache   = make(map[string]*ttemplate.Template)
+	templateCacheMu sync.RWMutex
+)
+
+func getCompiledTemplate(tpl string) (*ttemplate.Template, error) {
+	templateCacheMu.RLock()
+	t, ok := templateCache[tpl]
+	templateCacheMu.RUnlock()
+	if ok {
+		return t, nil
+	}
+
+	t, err := ttemplate.New("template").Funcs(getTemplateFuncMap()).Parse(tpl)
+	if err != nil {
+		return nil, err
+	}
+
+	templateCacheMu.Lock()
+	templateCache[tpl] = t
+	templateCacheMu.Unlock()
+	return t, nil
+}
+
+func TemplateExec(tpl string, d any) (TemlateRes, error) {
+
+	t, err := getCompiledTemplate(tpl)
 	if err != nil {
 		return TemlateRes{}, err
 	}
 
-	err = t.Execute(&b, d)
-	if err != nil {
+	var b bytes.Buffer
+	if err = t.Execute(&b, d); err != nil {
 		return TemlateRes{}, err
 	}
 
