@@ -224,20 +224,23 @@ func dhCreateTableValuesEnd(usrCtx any, deferred, token []byte) ([]byte, error) 
 		return []byte{}, err
 	}
 
-	b := rowDataGen(uctx)
+	b, buf := rowDataGen(uctx)
 	if b == nil {
 		return []byte{}, nil
+	}
+	if buf != nil {
+		defer bufferPool.Put(buf)
+	}
+
+	if uctx.insertIntoBuf != nil {
+		b = append(uctx.insertIntoBuf, b...)
+		uctx.insertIntoBuf = nil
 	} else {
-		if uctx.insertIntoBuf != nil {
-			b = append(uctx.insertIntoBuf, b...)
-			uctx.insertIntoBuf = nil
-		} else {
-			if uctx.whitespaceBuf != nil {
-				b = append(uctx.whitespaceBuf, b...)
-				uctx.whitespaceBuf = nil
-			}
-			b = append([]byte{','}, b...)
+		if uctx.whitespaceBuf != nil {
+			b = append(uctx.whitespaceBuf, b...)
+			uctx.whitespaceBuf = nil
 		}
+		b = append([]byte{','}, b...)
 	}
 
 	return b, nil
@@ -256,35 +259,37 @@ func dhCreateTableValuesStringEnd(usrCtx any, deferred, token []byte) ([]byte, e
 		return []byte{}, err
 	}
 
-	b := rowDataGen(uctx)
+	b, buf := rowDataGen(uctx)
 	if b == nil {
 		return []byte{}, nil
+	}
+	if buf != nil {
+		defer bufferPool.Put(buf)
+	}
+
+	if uctx.insertIntoBuf != nil {
+		b = append(uctx.insertIntoBuf, b...)
+		uctx.insertIntoBuf = nil
 	} else {
-		if uctx.insertIntoBuf != nil {
-			b = append(uctx.insertIntoBuf, b...)
-			uctx.insertIntoBuf = nil
-		} else {
-			if uctx.whitespaceBuf != nil {
-				b = append(uctx.whitespaceBuf, b...)
-				uctx.whitespaceBuf = nil
-			}
-			b = append([]byte{','}, b...)
+		if uctx.whitespaceBuf != nil {
+			b = append(uctx.whitespaceBuf, b...)
+			uctx.whitespaceBuf = nil
 		}
+		b = append([]byte{','}, b...)
 	}
 
 	return b, nil
 }
 
-func rowDataGen(uctx *userCtx) []byte {
+func rowDataGen(uctx *userCtx) ([]byte, *bytes.Buffer) {
 
 	row := uctx.filter.ValuePop()
 	if row.Values == nil {
-		return nil
+		return nil, nil
 	}
 
 	buf := bufferPool.Get().(*bytes.Buffer)
 	buf.Reset()
-	defer bufferPool.Put(buf)
 
 	buf.WriteByte('(')
 
@@ -318,11 +323,7 @@ func rowDataGen(uctx *userCtx) []byte {
 
 	buf.WriteByte(')')
 
-	// Return a copy of the buffer content
-	out := make([]byte, buf.Len())
-	copy(out, buf.Bytes())
-
-	return out
+	return buf.Bytes(), buf
 }
 
 // SecurityPolicyCheck checks the table passes the security rules
