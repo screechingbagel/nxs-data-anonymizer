@@ -2,6 +2,9 @@ package misc
 
 import (
 	"bytes"
+	"fmt"
+	"os"
+	"strconv"
 	"strings"
 	"sync"
 	ttemplate "text/template"
@@ -25,7 +28,29 @@ var templateFake = faker.New()
 var (
 	templateFuncMap     ttemplate.FuncMap
 	templateFuncMapOnce sync.Once
+	templateInvoiceMu   sync.Mutex
 )
+
+func fakerInvoice() string {
+	templateInvoiceMu.Lock()
+	defer templateInvoiceMu.Unlock()
+
+	counterFile := "/tmp/nxs_invoice_seq"
+	count := 1000
+
+	// Try to read the file
+	data, err := os.ReadFile(counterFile)
+	if err == nil {
+		parsed, err := strconv.Atoi(strings.TrimSpace(string(data)))
+		if err == nil {
+			count = parsed
+		}
+	}
+
+	// Write the incremented count back to the file
+	os.WriteFile(counterFile, []byte(strconv.Itoa(count+1)), 0644)
+	return fmt.Sprintf("INV-%08d", count)
+}
 
 func getTemplateFuncMap() ttemplate.FuncMap {
 	templateFuncMapOnce.Do(func() {
@@ -64,6 +89,8 @@ func getTemplateFuncMap() ttemplate.FuncMap {
 		t["fakerEIN"] = func() string {
 			return templateFake.Bothify("##-#######")
 		}
+
+		t["fakerInvoice"] = fakerInvoice
 
 		templateFuncMap = t
 	})
