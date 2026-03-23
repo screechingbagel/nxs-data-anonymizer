@@ -93,6 +93,9 @@ type tableData struct {
 	valOld    map[string]string
 	valEnvOld []string
 
+	// tplData is reused per row; fields are overwritten before each use.
+	tplData tplData
+
 	rules      []applyRule
 	rulesReady bool
 
@@ -124,6 +127,15 @@ type execFilterOpts struct {
 	t   misc.ValueType
 	v   string
 	tpl *ttemplate.Template
+}
+
+type tplData struct {
+	TableName        string
+	CurColumnName    string
+	Values           map[string]string
+	Variables        map[string]string
+	ColumnTypeRaw    string
+	ColumnTypeGroups [][]string
 }
 
 const uniqueAttempts = 5
@@ -558,23 +570,13 @@ func (filter *Filter) applyRules(tname string, rls []applyRule) error {
 			}
 		} else {
 
-			type tplData struct {
-				TableName        string
-				CurColumnName    string
-				Values           map[string]string
-				Variables        map[string]string
-				ColumnTypeRaw    string
-				ColumnTypeGroups [][]string
-			}
-
-			td := tplData{
-				TableName:        tname,
-				CurColumnName:    r.c.n,
-				Values:           valOld,
-				Variables:        filter.rules.variables,
-				ColumnTypeRaw:    r.c.t.raw,
-				ColumnTypeGroups: r.c.t.groups,
-			}
+			td := &filter.tableData.tplData
+			td.TableName = tname
+			td.CurColumnName = r.c.n
+			td.Values = valOld
+			td.Variables = filter.rules.variables
+			td.ColumnTypeRaw = r.c.t.raw
+			td.ColumnTypeGroups = r.c.t.groups
 
 			var tde []string
 			if r.cr.Type == misc.ValueTypeCommand {

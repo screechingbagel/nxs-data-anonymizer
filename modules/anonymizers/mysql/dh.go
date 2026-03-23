@@ -15,6 +15,8 @@ var bufferPool = sync.Pool{
 	},
 }
 
+var nullBytes = []byte("NULL")
+
 func dhSecurityInsertInto(usrCtx any, deferred, token []byte) ([]byte, error) {
 
 	uctx := usrCtx.(*userCtx)
@@ -180,11 +182,10 @@ func dhCreateTableValues(usrCtx any, deferred, token []byte) ([]byte, error) {
 		return []byte{}, nil
 	}
 
-	s := string(deferred)
-	if s == "NULL" {
+	if bytes.Equal(deferred, nullBytes) {
 		uctx.filter.ValueAdd(misc.TemplateNULL)
 	} else {
-		uctx.filter.ValueAdd(s)
+		uctx.filter.ValueAdd(string(deferred))
 	}
 
 	return []byte{}, nil
@@ -212,11 +213,10 @@ func dhCreateTableValuesEnd(usrCtx any, deferred, token []byte) ([]byte, error) 
 		return []byte{}, nil
 	}
 
-	s := string(deferred)
-	if s == "NULL" {
+	if bytes.Equal(deferred, nullBytes) {
 		uctx.filter.ValueAdd(misc.TemplateNULL)
 	} else {
-		uctx.filter.ValueAdd(s)
+		uctx.filter.ValueAdd(string(deferred))
 	}
 
 	// Apply filter for row
