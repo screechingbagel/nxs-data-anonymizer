@@ -77,41 +77,41 @@ func (c columnType) String() string {
 }
 
 var typePrefixes = []struct {
-	p string
+	p []byte
 	t columnType
 }{
 	// Strings
-	{"MEDIUMTEXT", columnTypeString},
-	{"LONGTEXT", columnTypeString},
-	{"TINYTEXT", columnTypeString},
-	{"DATETIME", columnTypeString},
-	{"VARCHAR", columnTypeString},
-	{"CHAR", columnTypeString},
-	{"TEXT", columnTypeString},
-	{"ENUM", columnTypeString},
-	{"DATE", columnTypeString},
-	{"TIME", columnTypeString},
-	{"YEAR", columnTypeString},
-	{"JSON", columnTypeString},
-	{"SET", columnTypeString},
+	{[]byte("MEDIUMTEXT"), columnTypeString},
+	{[]byte("LONGTEXT"), columnTypeString},
+	{[]byte("TINYTEXT"), columnTypeString},
+	{[]byte("DATETIME"), columnTypeString},
+	{[]byte("VARCHAR"), columnTypeString},
+	{[]byte("CHAR"), columnTypeString},
+	{[]byte("TEXT"), columnTypeString},
+	{[]byte("ENUM"), columnTypeString},
+	{[]byte("DATE"), columnTypeString},
+	{[]byte("TIME"), columnTypeString},
+	{[]byte("YEAR"), columnTypeString},
+	{[]byte("JSON"), columnTypeString},
+	{[]byte("SET"), columnTypeString},
 	// Numeric
-	{"MEDIUMINT", columnTypeNum},
-	{"SMALLINT", columnTypeNum},
-	{"TINYINT", columnTypeNum},
-	{"BIGINT", columnTypeNum},
-	{"DOUBLE", columnTypeNum},
-	{"FLOAT", columnTypeNum},
-	{"BOOL", columnTypeNum},
-	{"INT", columnTypeNum},
-	{"BIT", columnTypeNum},
-	{"DEC", columnTypeNum},
+	{[]byte("MEDIUMINT"), columnTypeNum},
+	{[]byte("SMALLINT"), columnTypeNum},
+	{[]byte("TINYINT"), columnTypeNum},
+	{[]byte("BIGINT"), columnTypeNum},
+	{[]byte("DOUBLE"), columnTypeNum},
+	{[]byte("FLOAT"), columnTypeNum},
+	{[]byte("BOOL"), columnTypeNum},
+	{[]byte("INT"), columnTypeNum},
+	{[]byte("BIT"), columnTypeNum},
+	{[]byte("DEC"), columnTypeNum},
 	// Binary
-	{"MEDIUMBLOB", columnTypeBinary},
-	{"LONGBLOB", columnTypeBinary},
-	{"TINYBLOB", columnTypeBinary},
-	{"VARBINARY", columnTypeBinary},
-	{"BINARY", columnTypeBinary},
-	{"BLOB", columnTypeBinary},
+	{[]byte("MEDIUMBLOB"), columnTypeBinary},
+	{[]byte("LONGBLOB"), columnTypeBinary},
+	{[]byte("TINYBLOB"), columnTypeBinary},
+	{[]byte("VARBINARY"), columnTypeBinary},
+	{[]byte("BINARY"), columnTypeBinary},
+	{[]byte("BLOB"), columnTypeBinary},
 }
 
 func userCtxInit(s InitOpts) (*userCtx, error) {

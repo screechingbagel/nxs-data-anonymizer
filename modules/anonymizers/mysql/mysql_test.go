@@ -161,6 +161,8 @@ func TestMySQLDos(t *testing.T) {
 		t.Fatal("read output SQL:", err)
 	}
 
+	// os.WriteFile(".testdata/mysql_test.dos.out.sql.actual", r.Bytes(), 0644)
+
 	if r.String() != e.String() {
 		t.Fatal("incorrect anonymization result")
 	}

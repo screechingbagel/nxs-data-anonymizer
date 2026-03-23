@@ -96,8 +96,10 @@ func dhCreateTableFieldName(usrCtx any, deferred, token []byte) ([]byte, error) 
 // See: https://dev.mysql.com/blog-archive/generated-columns-in-mysql-5-7-5
 var generatedRgx = regexp.MustCompile(`^([A-Z]+)(\([0-9]+\) | )(GENERATED ALWAYS AS|AS)`)
 
+var asBytes = []byte("AS")
+
 func checkGenerated(t []byte) bool {
-	if bytes.Contains(t, []byte{'A', 'S'}) {
+	if bytes.Contains(t, asBytes) {
 		return generatedRgx.Match(t)
 	}
 	return false
@@ -119,7 +121,7 @@ func dhCreateTableColumnAdd(usrCtx any, deferred, token []byte) ([]byte, error) 
 		t[uctx.columnName] = columnTypeNone
 
 		for _, pk := range typePrefixes {
-			if bytes.HasPrefix(trawUpper, []byte(pk.p)) {
+			if bytes.HasPrefix(trawUpper, pk.p) {
 				t[uctx.columnName] = pk.t
 				break
 			}

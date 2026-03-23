@@ -91,6 +91,9 @@ type tableData struct {
 	// reset (not reallocated) on every row to reduce GC pressure.
 	valOld    map[string]string
 	valEnvOld []string
+
+	rules      []applyRule
+	rulesReady bool
 }
 
 type rowValue struct {
@@ -248,12 +251,14 @@ func Init(opts InitOpts) (*Filter, error) {
 // TableCreate creates new data set for table `name`
 func (filter *Filter) TableCreate(name string) {
 	filter.tableData = tableData{
-		name:      name,
-		columns:   columnsInit(),
-		uniques:   make(map[string]map[string]any),
-		values:    []rowValue{},
-		valOld:    make(map[string]string),
-		valEnvOld: []string{},
+		name:       name,
+		columns:    columnsInit(),
+		uniques:    make(map[string]map[string]any),
+		values:     []rowValue{},
+		valOld:     make(map[string]string),
+		valEnvOld:  []string{},
+		rules:      []applyRule{},
+		rulesReady: false,
 	}
 }
 
@@ -320,6 +325,13 @@ func (filter *Filter) ValuePop() Row {
 }
 
 func (filter *Filter) Apply() error {
+
+	if filter.tableData.rulesReady {
+		if err := filter.applyRules(filter.tableData.name, filter.tableData.rules); err != nil {
+			return fmt.Errorf("filters apply: %w", err)
+		}
+		return nil
+	}
 
 	var rls []applyRule
 
@@ -407,7 +419,10 @@ func (filter *Filter) Apply() error {
 	}
 
 	// Apply rules
-	if err := filter.applyRules(tname, rls); err != nil {
+	filter.tableData.rules = rls
+	filter.tableData.rulesReady = true
+
+	if err := filter.applyRules(tname, filter.tableData.rules); err != nil {
 		return fmt.Errorf("filters apply: %w", err)
 	}
 
