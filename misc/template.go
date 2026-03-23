@@ -60,7 +60,7 @@ func fakerInvoice() string {
 		invoiceMax = count + invoiceBatchSize
 
 		// Write the next batch start value back to the file
-		os.WriteFile(counterFile, []byte(strconv.Itoa(invoiceMax)), 0644)
+		_ = os.WriteFile(counterFile, []byte(strconv.Itoa(invoiceMax)), 0644)
 	}
 
 	// Use next value from batch

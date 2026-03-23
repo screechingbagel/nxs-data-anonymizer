@@ -44,7 +44,11 @@ func main() {
 			fmt.Fprintf(os.Stderr, "could not create CPU profile: %v\n", err)
 			os.Exit(1)
 		}
-		defer f.Close()
+		defer func() {
+			if err := f.Close(); err != nil {
+				fmt.Fprintf(os.Stderr, "error closing CPU profile: %v\n", err)
+			}
+		}()
 		if err := pprof.StartCPUProfile(f); err != nil {
 			fmt.Fprintf(os.Stderr, "could not start CPU profile: %v\n", err)
 			os.Exit(1)
@@ -76,7 +80,11 @@ func main() {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "could not create memory profile: %v\n", err)
 		} else {
-			defer f.Close()
+			defer func() {
+				if err := f.Close(); err != nil {
+					fmt.Fprintf(os.Stderr, "error closing memory profile: %v\n", err)
+				}
+			}()
 			runtime.GC() // get up-to-date statistics
 			if err := pprof.WriteHeapProfile(f); err != nil {
 				fmt.Fprintf(os.Stderr, "could not write memory profile: %v\n", err)
