@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	ttemplate "text/template"
 
 	"github.com/nixys/nxs-data-anonymizer/misc"
 )
@@ -116,8 +117,9 @@ type linkValues struct {
 }
 
 type execFilterOpts struct {
-	t misc.ValueType
-	v string
+	t   misc.ValueType
+	v   string
+	tpl *ttemplate.Template
 }
 
 const uniqueAttempts = 5
@@ -132,11 +134,30 @@ const (
 )
 
 type applyRule struct {
-	c  *column
-	i  int
-	cr ColumnRuleOpts
-	lv map[string]string
-	u  map[string]any
+	c   *column
+	i   int
+	cr  ColumnRuleOpts
+	lv  map[string]string
+	u   map[string]any
+	tpl *ttemplate.Template
+}
+
+func newApplyRule(c *column, i int, cr ColumnRuleOpts, lv map[string]string, u map[string]any) (applyRule, error) {
+	rl := applyRule{
+		c:  c,
+		i:  i,
+		cr: cr,
+		lv: lv,
+		u:  u,
+	}
+	if cr.Type == misc.ValueTypeTemplate {
+		tpl, err := misc.GetCompiledTemplate(cr.Value)
+		if err != nil {
+			return rl, err
+		}
+		rl.tpl = tpl
+	}
+	return rl, nil
 }
 
 func Init(opts InitOpts) (*Filter, error) {
@@ -348,16 +369,11 @@ func (filter *Filter) Apply() error {
 		for _, l := range filter.rules.link {
 			if e, b := l.t[tname]; b {
 				if _, u := e[c.n]; u {
-					rls = append(
-						rls,
-						applyRule{
-							c:  c,
-							i:  i,
-							cr: l.r,
-							lv: l.v,
-							u:  l.u,
-						},
-					)
+					rl, err := newApplyRule(c, i, l.r, l.v, l.u)
+					if err != nil {
+						return fmt.Errorf("filters apply link: %w", err)
+					}
+					rls = append(rls, rl)
 					t = true
 					break
 				}
@@ -370,29 +386,22 @@ func (filter *Filter) Apply() error {
 		// Check direct rules for column
 		if tr != nil {
 			if cr, e := tr[c.n]; e {
-
-				rls = append(
-					rls,
-					applyRule{
-						c:  c,
-						i:  i,
-						cr: cr,
-					},
-				)
+				rl, err := newApplyRule(c, i, cr, nil, nil)
+				if err != nil {
+					return fmt.Errorf("filters apply direct: %w", err)
+				}
+				rls = append(rls, rl)
 				continue
 			}
 		}
 
 		// Check default rules for column
 		if cr, e := filter.rules.defaultRules[c.n]; e {
-			rls = append(
-				rls,
-				applyRule{
-					c:  c,
-					i:  i,
-					cr: cr,
-				},
-			)
+			rl, err := newApplyRule(c, i, cr, nil, nil)
+			if err != nil {
+				return fmt.Errorf("filters apply default: %w", err)
+			}
+			rls = append(rls, rl)
 			continue
 		}
 
@@ -406,14 +415,11 @@ func (filter *Filter) Apply() error {
 		// Default rules for types
 		if filter.rules.columnsPolicy == misc.SecurityPolicyColumnsRandomize {
 			if c.t.r != nil {
-				rls = append(
-					rls,
-					applyRule{
-						c:  c,
-						i:  i,
-						cr: *c.t.r,
-					},
-				)
+				rl, err := newApplyRule(c, i, *c.t.r, nil, nil)
+				if err != nil {
+					return fmt.Errorf("filters apply randomize: %w", err)
+				}
+				rls = append(rls, rl)
 			}
 		}
 	}
@@ -438,18 +444,30 @@ func (filter *Filter) applyRules(tname string, rls []applyRule) error {
 
 	valEnvGlob := filter.rules.valEnvGlob
 
+	hasCmd := false
+	for _, r := range rls {
+		if r.cr.Type == misc.ValueTypeCommand {
+			hasCmd = true
+			break
+		}
+	}
+
 	// Reuse the per-table maps and slices
 	valOld := filter.tableData.valOld
 	valEnvOld := filter.tableData.valEnvOld[:0]
 
 	for i, c := range filter.tableData.columns.cc {
 		valOld[c.n] = filter.tableData.values[i].V
-		valEnvOld = append(
-			valEnvOld,
-			fmt.Sprintf("%s%s=%s", envVarColumnPrefix, c.n, filter.tableData.values[i].V),
-		)
+		if hasCmd {
+			valEnvOld = append(
+				valEnvOld,
+				fmt.Sprintf("%s%s=%s", envVarColumnPrefix, c.n, filter.tableData.values[i].V),
+			)
+		}
 	}
-	filter.tableData.valEnvOld = valEnvOld
+	if hasCmd {
+		filter.tableData.valEnvOld = valEnvOld
+	}
 
 	// Apply rule for each specified column
 	for _, r := range rls {
@@ -474,7 +492,7 @@ func (filter *Filter) applyRules(tname string, rls []applyRule) error {
 
 				// If old value for this cell is NULL
 
-				v, d, err = filter.applyLinkFilter(r.c.n, r.cr, r.u, td, valEnvGlob)
+				v, d, err = filter.applyLinkFilter(r.c.n, r.cr, r.tpl, r.u, td, valEnvGlob)
 				if err != nil {
 					return fmt.Errorf("rules: %w", err)
 				}
@@ -489,7 +507,7 @@ func (filter *Filter) applyRules(tname string, rls []applyRule) error {
 				if e, b := r.lv[vo]; b {
 					v = e
 				} else {
-					v, d, err = filter.applyLinkFilter(r.c.n, r.cr, r.u, td, valEnvGlob)
+					v, d, err = filter.applyLinkFilter(r.c.n, r.cr, r.tpl, r.u, td, valEnvGlob)
 					if err != nil {
 						return fmt.Errorf("rules: %w", err)
 					}
@@ -522,16 +540,18 @@ func (filter *Filter) applyRules(tname string, rls []applyRule) error {
 				ColumnTypeGroups: r.c.t.groups,
 			}
 
-			tde := []string{
-				fmt.Sprintf("%s=%s", envVarTable, tname),
-				fmt.Sprintf("%s=%s", envVarCurColumn, r.c.n),
+			var tde []string
+			if r.cr.Type == misc.ValueTypeCommand {
+				tde = []string{
+					fmt.Sprintf("%s=%s", envVarTable, tname),
+					fmt.Sprintf("%s=%s", envVarCurColumn, r.c.n),
+				}
+				tde = append(tde, valEnvOld...)
+				tde = append(tde, valEnvGlob...)
+				tde = append(tde, r.c.t.env...)
 			}
 
-			tde = append(tde, valEnvOld...)
-			tde = append(tde, valEnvGlob...)
-			tde = append(tde, r.c.t.env...)
-
-			v, d, err = filter.applyColumnFilter(r.c.n, r.cr, td, tde)
+			v, d, err = filter.applyColumnFilter(r.c.n, r.cr, r.tpl, td, tde)
 			if err != nil {
 				return fmt.Errorf("rules: %w", err)
 			}
@@ -549,14 +569,15 @@ func (filter *Filter) applyRules(tname string, rls []applyRule) error {
 	return nil
 }
 
-func (filter *Filter) applyColumnFilter(cn string, cr ColumnRuleOpts, td any, tde []string) (string, bool, error) {
+func (filter *Filter) applyColumnFilter(cn string, cr ColumnRuleOpts, tpl *ttemplate.Template, td any, tde []string) (string, bool, error) {
 
 	for range uniqueAttempts {
 
 		v, d, err := execFilter(
 			execFilterOpts{
-				t: cr.Type,
-				v: cr.Value,
+				t:   cr.Type,
+				v:   cr.Value,
+				tpl: tpl,
 			},
 			td,
 			tde)
@@ -594,14 +615,15 @@ func (filter *Filter) applyColumnFilter(cn string, cr ColumnRuleOpts, td any, td
 	return "", false, fmt.Errorf("filter: unable to generate unique value for column `%s.%s`, check filter value for this column in config", filter.tableData.name, cn)
 }
 
-func (filter *Filter) applyLinkFilter(cn string, cr ColumnRuleOpts, u map[string]any, td any, tde []string) (string, bool, error) {
+func (filter *Filter) applyLinkFilter(cn string, cr ColumnRuleOpts, tpl *ttemplate.Template, u map[string]any, td any, tde []string) (string, bool, error) {
 
 	for range uniqueAttempts {
 
 		v, d, err := execFilter(
 			execFilterOpts{
-				t: cr.Type,
-				v: cr.Value,
+				t:   cr.Type,
+				v:   cr.Value,
+				tpl: tpl,
 			},
 			td,
 			tde)
@@ -646,10 +668,11 @@ func execFilter(f execFilterOpts, td any, tde []string) (string, bool, error) {
 	switch f.t {
 	case misc.ValueTypeTemplate:
 		var t misc.TemlateRes
-		t, err = misc.TemplateExec(
-			f.v,
-			td,
-		)
+		if f.tpl != nil {
+			t, err = misc.TemplateExecTpl(f.tpl, td)
+		} else {
+			t, err = misc.TemplateExec(f.v, td) // fallback
+		}
 		if err != nil {
 			return "", false, fmt.Errorf("filter: value compile template: %w", err)
 		}

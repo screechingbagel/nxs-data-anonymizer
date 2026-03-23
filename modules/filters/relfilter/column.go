@@ -67,4 +67,3 @@ func (c *columns) getNameByIndex(index int) string {
 	}
 	return c.cc[index].n
 }
-

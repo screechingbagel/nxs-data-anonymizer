@@ -75,7 +75,7 @@ var (
 	templateCacheMu sync.RWMutex
 )
 
-func getCompiledTemplate(tpl string) (*ttemplate.Template, error) {
+func GetCompiledTemplate(tpl string) (*ttemplate.Template, error) {
 	templateCacheMu.RLock()
 	t, ok := templateCache[tpl]
 	templateCacheMu.RUnlock()
@@ -94,15 +94,9 @@ func getCompiledTemplate(tpl string) (*ttemplate.Template, error) {
 	return t, nil
 }
 
-func TemplateExec(tpl string, d any) (TemlateRes, error) {
-
-	t, err := getCompiledTemplate(tpl)
-	if err != nil {
-		return TemlateRes{}, err
-	}
-
+func TemplateExecTpl(t *ttemplate.Template, d any) (TemlateRes, error) {
 	var b bytes.Buffer
-	if err = t.Execute(&b, d); err != nil {
+	if err := t.Execute(&b, d); err != nil {
 		return TemlateRes{}, err
 	}
 
@@ -130,4 +124,14 @@ func TemplateExec(tpl string, d any) (TemlateRes, error) {
 			DropRow: false,
 		},
 		nil
+}
+
+func TemplateExec(tpl string, d any) (TemlateRes, error) {
+
+	t, err := GetCompiledTemplate(tpl)
+	if err != nil {
+		return TemlateRes{}, err
+	}
+
+	return TemplateExecTpl(t, d)
 }

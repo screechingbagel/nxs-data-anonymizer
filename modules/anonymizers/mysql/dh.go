@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"regexp"
-	"strings"
 
 	"github.com/nixys/nxs-data-anonymizer/misc"
 )
@@ -152,7 +151,8 @@ func dhInsertIntoTableName(usrCtx any, deferred, token []byte) ([]byte, error) {
 		return []byte{}, nil
 	}
 
-	uctx.insertIntoBuf = append(uctx.security.tmpBuf, append(deferred, token...)...)
+	uctx.insertIntoBuf = append(uctx.security.tmpBuf, deferred...)
+	uctx.insertIntoBuf = append(uctx.insertIntoBuf, token...)
 
 	uctx.security.isSkip = false
 	uctx.security.tmpBuf = []byte{}
@@ -270,34 +270,44 @@ func dhCreateTableValuesStringEnd(usrCtx any, deferred, token []byte) ([]byte, e
 
 func rowDataGen(uctx *userCtx) []byte {
 
-	var out strings.Builder
-
 	row := uctx.filter.ValuePop()
 	if row.Values == nil {
 		return nil
 	}
 
+	var out []byte
+	out = append(out, '(')
+
+	tname := uctx.filter.TableNameGet()
+	tableCols := uctx.tables[tname]
+
 	for i, v := range row.Values {
 
 		if i > 0 {
-			out.WriteString(",")
+			out = append(out, ',')
 		}
 
 		if v.V == misc.TemplateNULL {
-			out.WriteString("NULL")
+			out = append(out, "NULL"...)
 		} else {
-			switch uctx.tables[uctx.filter.TableNameGet()][uctx.filter.ColumnGetName(i)] {
+			cname := uctx.filter.ColumnGetName(i)
+			switch tableCols[cname] {
 			case columnTypeString:
-				fmt.Fprintf(&out, "'%s'", v.V)
+				out = append(out, '\'')
+				out = append(out, v.V...)
+				out = append(out, '\'')
 			case columnTypeBinary:
-				fmt.Fprintf(&out, "_binary '%s'", v.V)
+				out = append(out, "_binary '"...)
+				out = append(out, v.V...)
+				out = append(out, '\'')
 			default:
-				fmt.Fprintf(&out, "%s", v.V)
+				out = append(out, v.V...)
 			}
 		}
 	}
 
-	return fmt.Appendf(nil, "(%s)", out.String())
+	out = append(out, ')')
+	return out
 }
 
 // SecurityPolicyCheck checks the table passes the security rules
