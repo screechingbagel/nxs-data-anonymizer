@@ -688,9 +688,10 @@ func (filter *Filter) applyLinkFilter(cn string, cr ColumnRuleOpts, tpl *ttempla
 	return "", false, fmt.Errorf("apply link filter: unable to generate unique value for column `%s.%s`, check filter value for this column in config", filter.tableData.name, cn)
 }
 
-// rowCleanup cleanups current row values
+// rowCleanup resets the current row values while retaining the backing array
+// to avoid reallocating it on every row (reduces GC pressure in tight loops).
 func (filter *Filter) rowCleanup() {
-	filter.tableData.values = []rowValue{}
+	filter.tableData.values = filter.tableData.values[:0]
 }
 
 func execFilter(f execFilterOpts, td any, tde []string) (string, bool, error) {
