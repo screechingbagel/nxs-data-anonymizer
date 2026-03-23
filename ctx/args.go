@@ -22,6 +22,7 @@ type Args struct {
 	Output     *string
 	Cleanup    bool
 	DBType     DBType
+	Generate   *string
 }
 
 // ArgsRead reads arguments from command line
@@ -68,6 +69,12 @@ func ArgsRead() (Args, error) {
 		"",
 		"Output file. If not set `stdout` is used")
 
+	generate := args.StringLong(
+		"generate",
+		'g',
+		"",
+		"Generate optimized Go code to specified file")
+
 	dbType := args.EnumLong(
 		"type",
 		't',
@@ -98,7 +105,9 @@ func ArgsRead() (Args, error) {
 		return Args{}, misc.ErrArgSuccessExit
 	}
 
-	if !args.IsSet("type") {
+	// If generating code, we don't need DBType validation strictness yet,
+	// but config path is required.
+	if !args.IsSet("type") && !args.IsSet("generate") {
 		fmt.Println("args: 'type' option must be specified")
 		return Args{}, misc.ErrConig
 	}
@@ -115,6 +124,12 @@ func ArgsRead() (Args, error) {
 		Output: func() *string {
 			if args.IsSet("output") {
 				return output
+			}
+			return nil
+		}(),
+		Generate: func() *string {
+			if args.IsSet("generate") {
+				return generate
 			}
 			return nil
 		}(),

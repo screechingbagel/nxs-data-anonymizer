@@ -345,11 +345,38 @@ func (filter *Filter) ValuePop() Row {
 	}
 }
 
+var GlobalRowProcessor func(tableName string, columns []string, values []string) ([]string, error)
+
 func (filter *Filter) Apply() error {
 
 	if filter.tableData.rulesReady {
 		if err := filter.applyRules(filter.tableData.name, filter.tableData.rules); err != nil {
 			return fmt.Errorf("filters apply: %w", err)
+		}
+		return nil
+	}
+
+	// Fast path for generated code
+	if GlobalRowProcessor != nil {
+		// Populate names list if empty (lazy init)
+		// Accessing filter.tableData.columns.cc
+		// We need a string slice of names.
+		// Construct it once per table would be ideal, but here we can just construct it.
+		cnames := make([]string, len(filter.tableData.columns.cc))
+		values := make([]string, len(filter.tableData.values))
+		for i, c := range filter.tableData.columns.cc {
+			cnames[i] = c.n
+			values[i] = filter.tableData.values[i].V
+		}
+
+		newValues, err := GlobalRowProcessor(filter.tableData.name, cnames, values)
+		if err != nil {
+			return err
+		}
+
+		// Update values
+		for i, v := range newValues {
+			filter.tableData.values[i].V = v
 		}
 		return nil
 	}

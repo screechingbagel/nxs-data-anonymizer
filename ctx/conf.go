@@ -7,71 +7,71 @@ import (
 	conf "github.com/nixys/nxs-go-conf"
 )
 
-type confOpts struct {
+type ConfOpts struct {
 	LogFile  string `conf:"logfile" conf_extraopts:"default=stderr"`
 	LogLevel string `conf:"loglevel" conf_extraopts:"default=info"`
 
-	Progress  progressConf                  `conf:"progress"`
-	Filters   map[string]filterConf         `conf:"filters"`
-	Link      []linkConf                    `conf:"link"`
-	Security  securityConf                  `conf:"security"`
-	Variables map[string]variableFilterConf `conf:"variables"`
+	Progress  ProgressConf                  `conf:"progress"`
+	Filters   map[string]FilterConf         `conf:"filters"`
+	Link      []LinkConf                    `conf:"link"`
+	Security  SecurityConf                  `conf:"security"`
+	Variables map[string]VariableFilterConf `conf:"variables"`
 
-	MySQL *mysqlConf `conf:"mysql"`
+	MySQL *MySQLConf `conf:"mysql"`
 }
 
-type progressConf struct {
+type ProgressConf struct {
 	Rhythm   string `conf:"rhythm" conf_extraopts:"default=0s"`
 	Humanize bool   `conf:"humanize"`
 }
 
-type filterConf struct {
-	Columns map[string]columnFilterConf `conf:"columns"`
+type FilterConf struct {
+	Columns map[string]ColumnFilterConf `conf:"columns"`
 }
 
-type columnFilterConf struct {
+type ColumnFilterConf struct {
 	Type   string `conf:"type" conf_extraopts:"default=template"`
 	Value  string `conf:"value" conf_extraopts:"required"`
 	Unique bool   `conf:"unique"`
 }
 
-type linkConf struct {
-	Rule columnFilterConf    `conf:"rule"`
+type LinkConf struct {
+	Rule ColumnFilterConf    `conf:"rule"`
 	With map[string][]string `conf:"with" conf_extraopts:"required"`
 }
 
-type variableFilterConf struct {
+type VariableFilterConf struct {
 	Type  string `conf:"type" conf_extraopts:"default=template"`
 	Value string `conf:"value" conf_extraopts:"required"`
 }
 
-type securityConf struct {
-	Policy     securityPolicyConf     `conf:"policy"`
-	Exceptions securityExceptionsConf `conf:"exceptions"`
-	Defaults   securityDefaultsConf   `conf:"defaults"`
+type SecurityConf struct {
+	Policy     SecurityPolicyConf     `conf:"policy"`
+	Exceptions SecurityExceptionsConf `conf:"exceptions"`
+	Defaults   SecurityDefaultsConf   `conf:"defaults"`
 }
 
-type securityPolicyConf struct {
+type SecurityPolicyConf struct {
 	Tables  string `conf:"tables" conf_extraopts:"default=pass"`
 	Columns string `conf:"columns" conf_extraopts:"default=pass"`
 }
 
-type securityExceptionsConf struct {
+type SecurityExceptionsConf struct {
 	Tables  []string `conf:"tables"`
 	Columns []string `conf:"columns"`
 }
 
-type securityDefaultsConf struct {
-	Columns map[string]columnFilterConf `conf:"columns"`
-	Types   []securityDefaultsTypeConf  `conf:"types"`
+type SecurityDefaultsConf struct {
+	Columns map[string]ColumnFilterConf `conf:"columns"`
+	Types   []SecurityDefaultsTypeConf  `conf:"types"`
 }
 
-type securityDefaultsTypeConf struct {
+type SecurityDefaultsTypeConf struct {
 	Regex string           `conf:"regex" conf_extraopts:"required"`
-	Rule  columnFilterConf `conf:"rule" conf_extraopts:"required"`
+	Rule  ColumnFilterConf `conf:"rule" conf_extraopts:"required"`
 }
 
-type mysqlConf struct {
+type MySQLConf struct {
 	Host     string `conf:"host" conf_extraopts:"required"`
 	Port     int    `conf:"port" conf_extraopts:"required"`
 	DB       string `conf:"db" conf_extraopts:"required"`
@@ -79,9 +79,9 @@ type mysqlConf struct {
 	Password string `conf:"password" conf_extraopts:"required"`
 }
 
-func confRead(confPath string) (confOpts, error) {
+func ConfRead(confPath string) (ConfOpts, error) {
 
-	var c confOpts
+	var c ConfOpts
 
 	err := conf.Load(&c, conf.Settings{
 		ConfPath:    confPath,

@@ -71,7 +71,7 @@ func AppCtxInit() (any, error) {
 		return nil, err
 	}
 
-	conf, err := confRead(args.ConfigPath)
+	conf, err := ConfRead(args.ConfigPath)
 	if err != nil {
 		tmpLogError("ctx init", err)
 		return nil, err

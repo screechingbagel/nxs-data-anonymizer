@@ -70,6 +70,108 @@ func fakerInvoice() string {
 	return fmt.Sprintf("INV-%08d", val)
 }
 
+// Exported wrappers for generated code
+
+func FakerInvoice() string {
+	return fakerInvoice()
+}
+
+func FakerName() string {
+	return templateFake.Person().Name()
+}
+
+func FakerFirstName() string {
+	return templateFake.Person().FirstName()
+}
+
+func FakerLastName() string {
+	return templateFake.Person().LastName()
+}
+
+func FakerEmail() string {
+	return templateFake.Internet().Email()
+}
+
+func FakerPhone() string {
+	return templateFake.Phone().Number()
+}
+
+func FakerAddress() string {
+	return templateFake.Address().Address()
+}
+
+func FakerStreetAddress() string {
+	return templateFake.Address().StreetAddress()
+}
+
+func FakerSecondaryAddress() string {
+	return templateFake.Address().SecondaryAddress()
+}
+
+func FakerCity() string {
+	return templateFake.Address().City()
+}
+
+func FakerPostcode() string {
+	return templateFake.Address().PostCode()
+}
+
+func FakerCompany() string {
+	return templateFake.Company().Name()
+}
+
+func FakerIBAN() string {
+	return strings.ToUpper(templateFake.Bothify("??####################"))
+}
+
+func FakerSwift() string {
+	return strings.ToUpper(templateFake.Bothify("??????##"))
+}
+
+func FakerEIN() string {
+	return templateFake.Bothify("##-#######")
+}
+
+var (
+	sprigUuidv4       func() string
+	sprigRandAlphaNum func(int) string
+	sprigRandNumeric  func(int) string
+)
+
+func init() {
+	fm := sprig.TxtFuncMap()
+	if f, ok := fm["uuidv4"].(func() string); ok {
+		sprigUuidv4 = f
+	}
+	if f, ok := fm["randAlphaNum"].(func(int) string); ok {
+		sprigRandAlphaNum = f
+	}
+	if f, ok := fm["randNumeric"].(func(int) string); ok {
+		sprigRandNumeric = f
+	}
+}
+
+func Uuidv4() string {
+	if sprigUuidv4 != nil {
+		return sprigUuidv4()
+	}
+	return ""
+}
+
+func RandAlphaNum(n int) string {
+	if sprigRandAlphaNum != nil {
+		return sprigRandAlphaNum(n)
+	}
+	return ""
+}
+
+func RandNumeric(n int) string {
+	if sprigRandNumeric != nil {
+		return sprigRandNumeric(n)
+	}
+	return ""
+}
+
 func getTemplateFuncMap() ttemplate.FuncMap {
 	templateFuncMapOnce.Do(func() {
 		t := sprig.TxtFuncMap()
@@ -79,36 +181,30 @@ func getTemplateFuncMap() ttemplate.FuncMap {
 		t["drop"] = func() string { return TemplateDrop }
 
 		// Names
-		t["fakerName"] = templateFake.Person().Name
-		t["fakerFirstName"] = templateFake.Person().FirstName
-		t["fakerLastName"] = templateFake.Person().LastName
+		t["fakerName"] = FakerName
+		t["fakerFirstName"] = FakerFirstName
+		t["fakerLastName"] = FakerLastName
 
 		// Contact
-		t["fakerEmail"] = templateFake.Internet().Email
-		t["fakerPhone"] = templateFake.Phone().Number
+		t["fakerEmail"] = FakerEmail
+		t["fakerPhone"] = FakerPhone
 
 		// Address
-		t["fakerAddress"] = templateFake.Address().Address
-		t["fakerStreetAddress"] = templateFake.Address().StreetAddress
-		t["fakerSecondaryAddress"] = templateFake.Address().SecondaryAddress
-		t["fakerCity"] = templateFake.Address().City
-		t["fakerPostcode"] = templateFake.Address().PostCode
+		t["fakerAddress"] = FakerAddress
+		t["fakerStreetAddress"] = FakerStreetAddress
+		t["fakerSecondaryAddress"] = FakerSecondaryAddress
+		t["fakerCity"] = FakerCity
+		t["fakerPostcode"] = FakerPostcode
 
 		// Company
-		t["fakerCompany"] = templateFake.Company().Name
+		t["fakerCompany"] = FakerCompany
 
 		// Identifiers
-		t["fakerIBAN"] = func() string {
-			return strings.ToUpper(templateFake.Bothify("??####################"))
-		}
-		t["fakerSwift"] = func() string {
-			return strings.ToUpper(templateFake.Bothify("??????##"))
-		}
-		t["fakerEIN"] = func() string {
-			return templateFake.Bothify("##-#######")
-		}
+		t["fakerIBAN"] = FakerIBAN
+		t["fakerSwift"] = FakerSwift
+		t["fakerEIN"] = FakerEIN
 
-		t["fakerInvoice"] = fakerInvoice
+		t["fakerInvoice"] = FakerInvoice
 
 		templateFuncMap = t
 	})
