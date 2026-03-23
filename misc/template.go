@@ -31,25 +31,43 @@ var (
 	templateInvoiceMu   sync.Mutex
 )
 
+var (
+	invoiceBatchSize = 1000
+	invoiceCurrent   = 0
+	invoiceMax       = 0
+)
+
 func fakerInvoice() string {
 	templateInvoiceMu.Lock()
 	defer templateInvoiceMu.Unlock()
 
 	counterFile := "/tmp/nxs_invoice_seq"
-	count := 1000
 
-	// Try to read the file
-	data, err := os.ReadFile(counterFile)
-	if err == nil {
-		parsed, err := strconv.Atoi(strings.TrimSpace(string(data)))
+	// Initialize or refresh batch if needed
+	if invoiceCurrent >= invoiceMax {
+		count := 1000
+		// Try to read the file
+		data, err := os.ReadFile(counterFile)
 		if err == nil {
-			count = parsed
+			parsed, err := strconv.Atoi(strings.TrimSpace(string(data)))
+			if err == nil {
+				count = parsed
+			}
 		}
+
+		// Reserve a batch
+		invoiceCurrent = count
+		invoiceMax = count + invoiceBatchSize
+
+		// Write the next batch start value back to the file
+		os.WriteFile(counterFile, []byte(strconv.Itoa(invoiceMax)), 0644)
 	}
 
-	// Write the incremented count back to the file
-	os.WriteFile(counterFile, []byte(strconv.Itoa(count+1)), 0644)
-	return fmt.Sprintf("INV-%08d", count)
+	// Use next value from batch
+	val := invoiceCurrent
+	invoiceCurrent++
+
+	return fmt.Sprintf("INV-%08d", val)
 }
 
 func getTemplateFuncMap() ttemplate.FuncMap {
