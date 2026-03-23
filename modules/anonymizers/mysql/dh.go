@@ -87,12 +87,13 @@ func dhCreateTableFieldName(usrCtx any, deferred, token []byte) ([]byte, error) 
 	return append(deferred, token...), nil
 }
 
-// checkGenerated returns true when specified type is `generated`
-// See: https://dev.mysql.com/blog-archive/generated-columns-in-mysql-5-7-5 for details
+// generatedRgx detects generated/virtual columns.
+// See: https://dev.mysql.com/blog-archive/generated-columns-in-mysql-5-7-5
+var generatedRgx = regexp.MustCompile(`^([A-Z]+)(\([0-9]+\) | )(GENERATED ALWAYS AS|AS)`)
+
 func checkGenerated(t []byte) bool {
-	if bytes.Contains(t, []byte{'A', 'S'}) == true {
-		b, _ := regexp.Match("^([A-Z]+)((\\([0-9]+\\) )| )(GENERATED ALWAYS AS|AS)", t)
-		return b
+	if bytes.Contains(t, []byte{'A', 'S'}) {
+		return generatedRgx.Match(t)
 	}
 	return false
 }
@@ -112,9 +113,9 @@ func dhCreateTableColumnAdd(usrCtx any, deferred, token []byte) ([]byte, error) 
 		}
 		t[uctx.columnName] = columnTypeNone
 
-		for _, ot := range uctx.optKinds {
-			if ot.r.Match(trawUpper) == true {
-				t[uctx.columnName] = ot.t
+		for _, pk := range typePrefixes {
+			if bytes.HasPrefix(trawUpper, []byte(pk.p)) {
+				t[uctx.columnName] = pk.t
 				break
 			}
 		}
