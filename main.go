@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"runtime"
+	"runtime/pprof"
 	"syscall"
 
 	"github.com/nixys/nxs-data-anonymizer/ctx"
@@ -36,6 +38,20 @@ func main() {
 		return
 	}
 
+	if args.CPUProfile != nil {
+		f, err := os.Create(*args.CPUProfile)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "could not create CPU profile: %v\n", err)
+			os.Exit(1)
+		}
+		defer f.Close()
+		if err := pprof.StartCPUProfile(f); err != nil {
+			fmt.Fprintf(os.Stderr, "could not start CPU profile: %v\n", err)
+			os.Exit(1)
+		}
+		defer pprof.StopCPUProfile()
+	}
+
 	err = appctx.Init(context.Background()).
 		RoutinesSet(
 			map[string]appctx.RoutineParam{
@@ -54,6 +70,20 @@ func main() {
 			},
 		}).
 		Run()
+
+	if args.MemProfile != nil {
+		f, err := os.Create(*args.MemProfile)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "could not create memory profile: %v\n", err)
+		} else {
+			defer f.Close()
+			runtime.GC() // get up-to-date statistics
+			if err := pprof.WriteHeapProfile(f); err != nil {
+				fmt.Fprintf(os.Stderr, "could not write memory profile: %v\n", err)
+			}
+		}
+	}
+
 	if err != nil {
 		switch err {
 		case misc.ErrArgSuccessExit:

@@ -95,6 +95,10 @@ type tableData struct {
 
 	rules      []applyRule
 	rulesReady bool
+
+	// Buffers for GlobalRowProcessor optimization
+	cnames []string
+	vbuf   []string
 }
 
 type rowValue struct {
@@ -358,18 +362,23 @@ func (filter *Filter) Apply() error {
 
 	// Fast path for generated code
 	if GlobalRowProcessor != nil {
-		// Populate names list if empty (lazy init)
-		// Accessing filter.tableData.columns.cc
-		// We need a string slice of names.
-		// Construct it once per table would be ideal, but here we can just construct it.
-		cnames := make([]string, len(filter.tableData.columns.cc))
-		values := make([]string, len(filter.tableData.values))
-		for i, c := range filter.tableData.columns.cc {
-			cnames[i] = c.n
-			values[i] = filter.tableData.values[i].V
+		
+		// Initialize buffers if needed
+		if filter.tableData.cnames == nil {
+			count := len(filter.tableData.columns.cc)
+			filter.tableData.cnames = make([]string, count)
+			filter.tableData.vbuf = make([]string, count)
+			for i, c := range filter.tableData.columns.cc {
+				filter.tableData.cnames[i] = c.n
+			}
 		}
 
-		newValues, err := GlobalRowProcessor(filter.tableData.name, cnames, values)
+		// Copy values to vbuf
+		for i, v := range filter.tableData.values {
+			filter.tableData.vbuf[i] = v.V
+		}
+
+		newValues, err := GlobalRowProcessor(filter.tableData.name, filter.tableData.cnames, filter.tableData.vbuf)
 		if err != nil {
 			return err
 		}

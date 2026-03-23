@@ -23,6 +23,8 @@ type Args struct {
 	Cleanup    bool
 	DBType     DBType
 	Generate   *string
+	CPUProfile *string
+	MemProfile *string
 }
 
 // ArgsRead reads arguments from command line
@@ -74,6 +76,18 @@ func ArgsRead() (Args, error) {
 		'g',
 		"",
 		"Generate optimized Go code to specified file")
+
+	cpuprofile := args.StringLong(
+		"cpuprofile",
+		0,
+		"",
+		"Write cpu profile to file")
+
+	memprofile := args.StringLong(
+		"memprofile",
+		0,
+		"",
+		"Write memory profile to file")
 
 	dbType := args.EnumLong(
 		"type",
@@ -130,6 +144,18 @@ func ArgsRead() (Args, error) {
 		Generate: func() *string {
 			if args.IsSet("generate") {
 				return generate
+			}
+			return nil
+		}(),
+		CPUProfile: func() *string {
+			if args.IsSet("cpuprofile") {
+				return cpuprofile
+			}
+			return nil
+		}(),
+		MemProfile: func() *string {
+			if args.IsSet("memprofile") {
+				return memprofile
 			}
 			return nil
 		}(),
