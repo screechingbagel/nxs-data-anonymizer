@@ -55,10 +55,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rogpeppe/go-internal v1.9.0 h1:73kH8U+JUqXU8lRuOHeVHaa/SZPifC7BkcraZVejAe8=
 github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/fJaraNFVN+nFs=
-github.com/screechingbagel/nxs-go-fsm v0.0.0-20260323211830-a9efd5a29866 h1:Vguoe7lj0I7S00km8MhZ2z8+X1zEYXMYt9GH8/8QiFE=
-github.com/screechingbagel/nxs-go-fsm v0.0.0-20260323211830-a9efd5a29866/go.mod h1:igSr5qh3OqTFXo0j5F39DvaWgvTYcab/vLPCiK6ByRc=
-github.com/screechingbagel/nxs-go-fsm v0.0.0-20260323212250-01aea0d58217 h1:tDgrLb80T3+4feTTisp+c0iVVFw53FbovtoWhSA1dAI=
-github.com/screechingbagel/nxs-go-fsm v0.0.0-20260323212250-01aea0d58217/go.mod h1:igSr5qh3OqTFXo0j5F39DvaWgvTYcab/vLPCiK6ByRc=
+github.com/screechingbagel/nxs-go-fsm v0.0.0-20260323225450-858ea73512a4 h1:1VdEisTe1bGRFq/79OEvSu1JnXDhvxU9AXOlU4M022I=
+github.com/screechingbagel/nxs-go-fsm v0.0.0-20260323225450-858ea73512a4/go.mod h1:VlGV48oYpYioxAmcSVfa7cjuzXkOf5DaNKgwHx99Sno=
 github.com/shopspring/decimal v1.4.0 h1:bxl37RwXBklmTi0C79JfXCEBD1cqqHt0bbgBAGFp81k=
 github.com/shopspring/decimal v1.4.0/go.mod h1:gawqmDU56v4yIKSwfBSFip1HdCCXN8/+DMd9qYNcwME=
 github.com/sirupsen/logrus v1.9.4 h1:TsZE7l11zFCLZnZ+teH4Umoq5BhEIfIzfRDZ1Uzql2w=

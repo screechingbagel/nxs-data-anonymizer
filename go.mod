@@ -30,7 +30,6 @@ require (
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
-	github.com/screechingbagel/nxs-go-fsm v0.0.0-20260323211830-a9efd5a29866 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	golang.org/x/crypto v0.49.0 // indirect
@@ -40,4 +39,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/nixys/nxs-go-fsm => github.com/screechingbagel/nxs-go-fsm v0.0.0-20260323212250-01aea0d58217
+replace github.com/nixys/nxs-go-fsm => github.com/screechingbagel/nxs-go-fsm v0.0.0-20260323225450-858ea73512a4
