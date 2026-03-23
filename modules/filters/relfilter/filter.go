@@ -362,7 +362,7 @@ func (filter *Filter) Apply() error {
 
 	// Fast path for generated code
 	if GlobalRowProcessor != nil {
-		
+
 		// Initialize buffers if needed
 		if filter.tableData.cnames == nil {
 			count := len(filter.tableData.columns.cc)

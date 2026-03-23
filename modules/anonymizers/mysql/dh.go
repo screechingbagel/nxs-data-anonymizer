@@ -4,9 +4,16 @@ import (
 	"bytes"
 	"fmt"
 	"regexp"
+	"sync"
 
 	"github.com/nixys/nxs-data-anonymizer/misc"
 )
+
+var bufferPool = sync.Pool{
+	New: func() any {
+		return new(bytes.Buffer)
+	},
+}
 
 func dhSecurityInsertInto(usrCtx any, deferred, token []byte) ([]byte, error) {
 
@@ -275,8 +282,11 @@ func rowDataGen(uctx *userCtx) []byte {
 		return nil
 	}
 
-	var out []byte
-	out = append(out, '(')
+	buf := bufferPool.Get().(*bytes.Buffer)
+	buf.Reset()
+	defer bufferPool.Put(buf)
+
+	buf.WriteByte('(')
 
 	tname := uctx.filter.TableNameGet()
 	tableCols := uctx.tables[tname]
@@ -284,29 +294,34 @@ func rowDataGen(uctx *userCtx) []byte {
 	for i, v := range row.Values {
 
 		if i > 0 {
-			out = append(out, ',')
+			buf.WriteByte(',')
 		}
 
 		if v.V == misc.TemplateNULL {
-			out = append(out, "NULL"...)
+			buf.WriteString("NULL")
 		} else {
 			cname := uctx.filter.ColumnGetName(i)
 			switch tableCols[cname] {
 			case columnTypeString:
-				out = append(out, '\'')
-				out = append(out, v.V...)
-				out = append(out, '\'')
+				buf.WriteByte('\'')
+				buf.WriteString(v.V)
+				buf.WriteByte('\'')
 			case columnTypeBinary:
-				out = append(out, "_binary '"...)
-				out = append(out, v.V...)
-				out = append(out, '\'')
+				buf.WriteString("_binary '")
+				buf.WriteString(v.V)
+				buf.WriteByte('\'')
 			default:
-				out = append(out, v.V...)
+				buf.WriteString(v.V)
 			}
 		}
 	}
 
-	out = append(out, ')')
+	buf.WriteByte(')')
+
+	// Return a copy of the buffer content
+	out := make([]byte, buf.Len())
+	copy(out, buf.Bytes())
+
 	return out
 }
 
