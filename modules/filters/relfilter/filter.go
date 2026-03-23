@@ -334,8 +334,8 @@ func (filter *Filter) Apply() error {
 		// Check linked column
 		t := false
 		for _, l := range filter.rules.link {
-			if e, b := l.t[tname]; b == true {
-				if _, u := e[c.n]; u == true {
+			if e, b := l.t[tname]; b {
+				if _, u := e[c.n]; u {
 					rls = append(
 						rls,
 						applyRule{
@@ -602,11 +602,11 @@ func (filter *Filter) applyLinkFilter(cn string, cr ColumnRuleOpts, u map[string
 			return v, false, nil
 		}
 
-		if cr.Unique == false {
+		if !cr.Unique {
 			return v, false, nil
 		}
 
-		if _, b := u[v]; b == false {
+		if _, b := u[v]; !b {
 			u[v] = nil
 			return v, false, nil
 		}
@@ -658,7 +658,7 @@ func execFilter(f execFilterOpts, td any, tde []string) (string, bool, error) {
 		if err := cmd.Run(); err != nil {
 
 			e, b := err.(*exec.ExitError)
-			if b == false {
+			if !b {
 				return "", false, fmt.Errorf("filter: value exec command: %w", err)
 			}
 

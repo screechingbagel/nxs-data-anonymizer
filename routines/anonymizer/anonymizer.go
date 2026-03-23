@@ -104,7 +104,7 @@ func Runtime(app appctx.App) error {
 
 func anonymize(st anonymizeOpts) error {
 
-	if st.db.Type == ctx.DBTypeMySQL && st.db.Cleanup == true && st.db.MySQL != nil {
+	if st.db.Type == ctx.DBTypeMySQL && st.db.Cleanup && st.db.MySQL != nil {
 		if err := st.db.MySQL.DBCleanup(); err != nil {
 
 			st.l.WithFields(logrus.Fields{
@@ -127,7 +127,7 @@ func progressLog(l *logrus.Logger, b int64, h bool) {
 	var s string
 
 	// Prepare output bytes string
-	if h == true {
+	if h {
 		s = units.BytesSize(float64(b))
 	} else {
 		s = strconv.FormatInt(b, 10)

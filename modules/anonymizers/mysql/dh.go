@@ -33,7 +33,7 @@ func dhSecurityInsertIntoValues(usrCtx any, deferred, token []byte) ([]byte, err
 
 	uctx := usrCtx.(*userCtx)
 
-	if uctx.security.isSkip == true {
+	if uctx.security.isSkip {
 		return []byte{}, nil
 	}
 
@@ -47,7 +47,7 @@ func dhSecurityInsertIntoValueSearch(usrCtx any, deferred, token []byte) ([]byte
 
 	uctx := usrCtx.(*userCtx)
 
-	if uctx.security.isSkip == true {
+	if uctx.security.isSkip {
 		return []byte{}, nil
 	}
 
@@ -60,7 +60,7 @@ func dhSecurityValuesEnd(usrCtx any, deferred, token []byte) ([]byte, error) {
 
 	uctx := usrCtx.(*userCtx)
 
-	if uctx.security.isSkip == true {
+	if uctx.security.isSkip {
 		return []byte{}, nil
 	}
 
@@ -105,7 +105,7 @@ func dhCreateTableColumnAdd(usrCtx any, deferred, token []byte) ([]byte, error) 
 	traw := bytes.TrimSpace(deferred)
 	trawUpper := bytes.ToUpper(traw)
 
-	if checkGenerated(trawUpper) == false {
+	if !checkGenerated(trawUpper) {
 
 		t, b := uctx.tables[uctx.filter.TableNameGet()]
 		if !b {
@@ -162,7 +162,7 @@ func dhCreateTableValues(usrCtx any, deferred, token []byte) ([]byte, error) {
 
 	uctx := usrCtx.(*userCtx)
 
-	if uctx.security.isSkip == true {
+	if uctx.security.isSkip {
 		return []byte{}, nil
 	}
 
@@ -180,7 +180,7 @@ func dhCreateTableValuesString(usrCtx any, deferred, token []byte) ([]byte, erro
 
 	uctx := usrCtx.(*userCtx)
 
-	if uctx.security.isSkip == true {
+	if uctx.security.isSkip {
 		return []byte{}, nil
 	}
 
@@ -194,7 +194,7 @@ func dhCreateTableValuesEnd(usrCtx any, deferred, token []byte) ([]byte, error) 
 
 	uctx := usrCtx.(*userCtx)
 
-	if uctx.security.isSkip == true {
+	if uctx.security.isSkip {
 		return []byte{}, nil
 	}
 
@@ -229,7 +229,7 @@ func dhCreateTableValuesStringEnd(usrCtx any, deferred, token []byte) ([]byte, e
 
 	uctx := usrCtx.(*userCtx)
 
-	if uctx.security.isSkip == true {
+	if uctx.security.isSkip {
 		return []byte{}, nil
 	}
 
@@ -301,7 +301,7 @@ func securityPolicyCheck(uctx *userCtx, tname string) bool {
 	}
 
 	// Check specified table name in exceptions
-	if _, b := uctx.security.tableExceptions[tname]; b == true {
+	if _, b := uctx.security.tableExceptions[tname]; b {
 		return true
 	}
 

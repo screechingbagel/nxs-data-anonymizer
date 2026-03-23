@@ -23,7 +23,7 @@ func dhCopyValuesEnd(usrCtx any, deferred, token []byte) ([]byte, error) {
 
 	uctx := usrCtx.(*userCtx)
 
-	if uctx.security.isSkip == true {
+	if uctx.security.isSkip {
 		return []byte{}, nil
 	}
 
@@ -107,7 +107,7 @@ func dhFieldName(usrCtx any, deferred, token []byte) ([]byte, error) {
 
 	uctx := usrCtx.(*userCtx)
 
-	if uctx.security.isSkip == true {
+	if uctx.security.isSkip {
 		return []byte{}, nil
 	}
 
@@ -125,7 +125,7 @@ func dhTableCopyTail(usrCtx any, deferred, token []byte) ([]byte, error) {
 
 	uctx := usrCtx.(*userCtx)
 
-	if uctx.security.isSkip == true {
+	if uctx.security.isSkip {
 		return []byte{}, nil
 	}
 
@@ -138,7 +138,7 @@ func dhValue(usrCtx any, deferred, token []byte) ([]byte, error) {
 
 	uctx := usrCtx.(*userCtx)
 
-	if uctx.security.isSkip == true {
+	if uctx.security.isSkip {
 		return []byte{}, nil
 	}
 
@@ -156,7 +156,7 @@ func dhValueEnd(usrCtx any, deferred, token []byte) ([]byte, error) {
 
 	uctx := usrCtx.(*userCtx)
 
-	if uctx.security.isSkip == true {
+	if uctx.security.isSkip {
 		return []byte{}, nil
 	}
 
@@ -226,7 +226,7 @@ func securityPolicyCheck(uctx *userCtx, tname string) bool {
 	}
 
 	// Check specified table name in exceptions
-	if _, b := uctx.security.tableExceptions[tname]; b == true {
+	if _, b := uctx.security.tableExceptions[tname]; b {
 		return true
 	}
 

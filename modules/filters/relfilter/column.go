@@ -68,19 +68,3 @@ func (c *columns) getNameByIndex(index int) string {
 	return c.cc[index].n
 }
 
-func (c *columns) delByName(name string) {
-
-	// Get current column element
-	v := c.m[name]
-
-	// Delete element from map
-	delete(c.m, name)
-
-	// Delete element from slice
-	for k, e := range c.cc {
-		if e == v {
-			c.cc = append(c.cc[:k], c.cc[k+1:]...)
-			break
-		}
-	}
-}

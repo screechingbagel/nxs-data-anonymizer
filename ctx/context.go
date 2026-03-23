@@ -129,7 +129,7 @@ func AppCtxInit() (any, error) {
 		}
 		c.DB.MySQL = &m
 	} else {
-		if args.Cleanup == true {
+		if args.Cleanup {
 			c.Log.WithFields(logrus.Fields{
 				"details": "destination database clean up was requested but connection to database doesn't specified",
 			}).Errorf("ctx init")

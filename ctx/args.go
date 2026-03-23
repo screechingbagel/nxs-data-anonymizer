@@ -87,18 +87,18 @@ func ArgsRead() (Args, error) {
 	args.Parse(os.Args)
 
 	/* Show help */
-	if *helpFlag == true {
+	if *helpFlag {
 		argsHelp(args)
 		return Args{}, misc.ErrArgSuccessExit
 	}
 
 	/* Show version */
-	if *versionFlag == true {
+	if *versionFlag {
 		argsVersion()
 		return Args{}, misc.ErrArgSuccessExit
 	}
 
-	if args.IsSet("type") == false {
+	if !args.IsSet("type") {
 		fmt.Println("args: 'type' option must be specified")
 		return Args{}, misc.ErrConig
 	}
@@ -107,13 +107,13 @@ func ArgsRead() (Args, error) {
 		ConfigPath: *confPath,
 		LogFormat:  LogFormat(*logformat),
 		Input: func() *string {
-			if args.IsSet("input") == true {
+			if args.IsSet("input") {
 				return input
 			}
 			return nil
 		}(),
 		Output: func() *string {
-			if args.IsSet("output") == true {
+			if args.IsSet("output") {
 				return output
 			}
 			return nil
