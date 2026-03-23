@@ -1,6 +1,7 @@
 package ctx
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"os"
@@ -137,7 +138,7 @@ func AppCtxInit() (any, error) {
 		}
 	}
 
-	c.PR = progressreader.Init(ir)
+	c.PR = progressreader.Init(bufio.NewReader(ir))
 
 	vr := func() map[string]relfilter.VariableRuleOpts {
 		rules := make(map[string]relfilter.VariableRuleOpts)
