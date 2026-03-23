@@ -104,3 +104,13 @@ LOCK TABLES `table3` WRITE;
 INSERT INTO `table3` VALUES (1,'test4','https://github.com/nixys/nxs-rbac-operator0.git','none','','',''),(2,'test5','https://github.com/nixys/nxs-rbac-operator.git','none','','',''),(3,'test6','https://github.com/nixys/nxs-rbac-operator2.git','none','','','');
 /*!40000 ALTER TABLE `table3` ENABLE KEYS */;
 UNLOCK TABLES;
+CREATE TABLE `table4` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `test_val` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB;
+
+INSERT INTO `table4` VALUES (1,'foo'),
+(2,'bar'),
+(3,'baz'),
+(4,'qux');

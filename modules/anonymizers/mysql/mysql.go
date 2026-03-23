@@ -11,11 +11,13 @@ import (
 	fsm "github.com/nixys/nxs-go-fsm"
 )
 
-// func DataHandlerAddComma(ctx any, data []byte, trigger []byte) ([]byte, error) {
-// 	return []byte{}, nil
-// }
-
 func DataHandlerAddComma(ctx any, data []byte, trigger []byte) ([]byte, error) {
+	uctx := ctx.(*userCtx)
+	if uctx.insertIntoBuf != nil {
+		uctx.insertIntoBuf = append(uctx.insertIntoBuf, data...)
+	} else {
+		uctx.whitespaceBuf = append(uctx.whitespaceBuf, data...)
+	}
 	return []byte{}, nil
 }
 
@@ -50,6 +52,7 @@ type userCtx struct {
 	security      securityCtx
 	tables        map[string]map[string]columnType
 	insertIntoBuf []byte
+	whitespaceBuf []byte
 }
 
 type securityCtx struct {

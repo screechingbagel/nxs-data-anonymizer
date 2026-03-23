@@ -15,6 +15,7 @@ func dhSecurityInsertInto(usrCtx any, deferred, token []byte) ([]byte, error) {
 
 	uctx.security.tmpBuf = token
 	uctx.insertIntoBuf = nil
+	uctx.whitespaceBuf = nil
 
 	return deferred, nil
 }
@@ -51,7 +52,11 @@ func dhSecurityInsertIntoValueSearch(usrCtx any, deferred, token []byte) ([]byte
 		return []byte{}, nil
 	}
 
-	uctx.insertIntoBuf = append(uctx.insertIntoBuf, deferred...)
+	if uctx.insertIntoBuf != nil {
+		uctx.insertIntoBuf = append(uctx.insertIntoBuf, deferred...)
+	} else {
+		uctx.whitespaceBuf = append(uctx.whitespaceBuf, deferred...)
+	}
 
 	return []byte{}, nil
 }
@@ -218,6 +223,10 @@ func dhCreateTableValuesEnd(usrCtx any, deferred, token []byte) ([]byte, error) 
 			b = append(uctx.insertIntoBuf, b...)
 			uctx.insertIntoBuf = nil
 		} else {
+			if uctx.whitespaceBuf != nil {
+				b = append(uctx.whitespaceBuf, b...)
+				uctx.whitespaceBuf = nil
+			}
 			b = append([]byte{','}, b...)
 		}
 	}
@@ -246,6 +255,10 @@ func dhCreateTableValuesStringEnd(usrCtx any, deferred, token []byte) ([]byte, e
 			b = append(uctx.insertIntoBuf, b...)
 			uctx.insertIntoBuf = nil
 		} else {
+			if uctx.whitespaceBuf != nil {
+				b = append(uctx.whitespaceBuf, b...)
+				uctx.whitespaceBuf = nil
+			}
 			b = append([]byte{','}, b...)
 		}
 	}

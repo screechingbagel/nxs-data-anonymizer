@@ -51,6 +51,15 @@ func TestMySQL(t *testing.T) {
 							Unique: false,
 						},
 					},
+
+					// Delete id=2 from multiline values block
+					"table4": {
+						"id": relfilter.ColumnRuleOpts{
+							Type:   misc.ValueTypeTemplate,
+							Value:  "{{ if eq .Values.id \"2\" }}{{ drop }}{{ else }}{{ .Values.id }}{{ end }}",
+							Unique: false,
+						},
+					},
 				},
 			},
 		},
@@ -72,7 +81,7 @@ func TestMySQL(t *testing.T) {
 		t.Fatal("read output SQL:", err)
 	}
 
-	// os.WriteFile(".testdata/mysql_test.out.sql", r.Bytes(), 0644)
+	// os.WriteFile(".testdata/mysql_test.out.sql.actual", r.Bytes(), 0644)
 
 	if r.String() != e.String() {
 		t.Fatal("incorrect anonymization result")
@@ -122,6 +131,15 @@ func TestMySQLDos(t *testing.T) {
 							Unique: false,
 						},
 					},
+
+					// Delete id=2 from multiline values block
+					"table4": {
+						"id": relfilter.ColumnRuleOpts{
+							Type:   misc.ValueTypeTemplate,
+							Value:  "{{ if eq .Values.id \"2\" }}{{ drop }}{{ else }}{{ .Values.id }}{{ end }}",
+							Unique: false,
+						},
+					},
 				},
 			},
 		},
@@ -142,8 +160,6 @@ func TestMySQLDos(t *testing.T) {
 	if _, err := e.ReadFrom(fout); err != nil {
 		t.Fatal("read output SQL:", err)
 	}
-
-	// os.WriteFile(".testdata/mysql_test.dos.out.sql", r.Bytes(), 0644)
 
 	if r.String() != e.String() {
 		t.Fatal("incorrect anonymization result")
